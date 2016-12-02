@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="5" height="5" tilewidth="32" tileheight="32" nextobjectid="22">
+ <tileset firstgid="1" name="32x32" tilewidth="32" tileheight="32" tilecount="18" columns="6">
+  <image source="data/32x32 AAA/32x32.png" width="192" height="96"/>
+ </tileset>
+ <tileset firstgid="19" name="interior_2" tilewidth="32" tileheight="32" tilecount="256" columns="16">
+  <image source="data/32x32 AAA/interior_2.png" width="512" height="512"/>
+ </tileset>
+ <layer name="Floor" width="5" height="5">
+  <data encoding="csv">
+67,67,67,67,67,
+67,67,67,67,67,
+67,67,68,67,67,
+67,67,67,67,67,
+67,67,67,68,67
+</data>
+ </layer>
+ <objectgroup name="Blockers">
+  <object id="1" x="0" y="32" height="32"/>
+  <object id="3" name="blocker" x="0" y="0" width="32" height="96"/>
+  <object id="4" name="blocker" x="128" y="0" width="32" height="64"/>
+  <object id="5" name="blocker" x="0" y="96" width="32" height="32"/>
+  <object id="6" name="blocker" x="32" y="0" width="64" height="32"/>
+ </objectgroup>
+ <objectgroup name="Objects">
+  <object id="17" name="computer" x="32" y="0" width="32" height="32"/>
+  <object id="20" name="book_case" x="64" y="0" width="32" height="64"/>
+  <object id="21" name="bed" x="0" y="0" width="32" height="64"/>
+ </objectgroup>
+ <layer name="Furniture" width="5" height="5">
+  <data encoding="csv">
+33,70,0,0,115,
+49,86,0,0,131,
+65,0,0,0,0,
+64,0,0,0,0,
+0,0,0,0,0
+</data>
+ </layer>
+ <layer name="Furniture 2" width="5" height="5">
+  <data encoding="csv">
+0,12,122,16,0,
+0,0,136,0,0,
+0,0,0,0,0,
+25,0,0,0,0,
+0,0,0,0,0
+</data>
+ </layer>
+ <layer name="Player_layer" width="5" height="5">
+  <data encoding="csv">
+0,0,0,0,0,
+0,0,0,0,0,
+0,0,0,0,0,
+0,0,0,0,0,
+0,0,0,0,0
+</data>
+ </layer>
+</map>

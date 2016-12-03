@@ -1,4 +1,5 @@
-import sys, threading, time, math
+#!/usr/bin/env
+import sys, threading, time, os, math
 import pygame as pg
 import pyscroll
 from pytmx.util_pygame import load_pygame
@@ -27,20 +28,20 @@ mouse_size = (32,32)
 blockers = []
 interactable_objects = {}
 
-default_mouse = utils.load_image(r"mouse\default.png")
-click_mouse = utils.load_image(r"mouse\clickable.png")
-menu_mouse = utils.load_image(r"mouse\menu.png")
+default_mouse = utils.load_image(os.path.join("mouse", "default.png"))
+click_mouse = utils.load_image(os.path.join("mouse", "clickable.png"))
+menu_mouse = utils.load_image(os.path.join("mouse", "menu.png"))
 
 default_mouse = (pg.transform.smoothscale(default_mouse[0], mouse_size), default_mouse[1])
 click_mouse = (pg.transform.smoothscale(click_mouse[0], mouse_size), click_mouse[1])
 menu_mouse = (pg.transform.smoothscale(menu_mouse[0], mouse_size), menu_mouse[1])
 
-menu_3 = utils.load_image(r"menus\menu_3.png")
-menu_4 = utils.load_image(r"menus\menu_4.png")
+menu_3 = utils.load_image(os.path.join("menus", "menu_3.png"))
+menu_4 = utils.load_image(os.path.join("menus", "menu_4.png"))
 
-smallfont = pg.font.Font("data/fonts/prstartk.ttf", 20)
-medfont = pg.font.Font("data/fonts/prstartk.ttf", 35)
-largefont = pg.font.Font("data/fonts/prstartk.ttf", 50)
+smallfont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 20)
+medfont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 35)
+largefont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 50)
 
 tile_renderer = load_pygame("dorm.tmx")
 map_data = pyscroll.data.TiledMapData(tile_renderer)
@@ -191,9 +192,7 @@ def mouse_click_process(obj_name):
 class Player(pg.sprite.Sprite):
     def __init__(self, blockers):
         super(Player, self).__init__()
-        self.image, self.rect = utils.load_image(r"character\baldric_walk\baldric_walk 2 (2).png",-1)
-        #rect only represents the leg of the character
-        #self.collision_rect =  pg.Rect(self.rect[0]+self.rect[2]/4, self.rect[1] + self.rect[3] / 2, self.rect[2]/2, self.rect[3] / 2)
+        self.image, self.rect = utils.load_image(os.path.join("character","baldric_walk","baldric_walk 2 (2).png"),-1)
 
         global frame_repeater, screen_width, screen_height
         offset = 64
@@ -226,16 +225,16 @@ class Player(pg.sprite.Sprite):
             self.counter += 1
         if direction == "down":
             self.last_direction = "down"
-            self.image, self.temp_rect = utils.load_image(r"character\baldric_walk\baldric_walk 2 ("+str(self.counter)+").png",-1)
+            self.image, self.temp_rect = utils.load_image(os.path.join("character","baldric_walk","baldric_walk 2 ("+str(self.counter)+").png"),-1)
         elif direction == "up":
             self.last_direction = "up"
-            self.image, self.temp_rect = utils.load_image(r"character\baldric_walk\baldric_walk 0 ("+str(self.counter)+").png",-1)
+            self.image, self.temp_rect = utils.load_image(os.path.join("character","baldric_walk","baldric_walk 0 ("+str(self.counter)+").png"),-1)
         elif direction == "left":
             self.last_direction = "left"
-            self.image, self.temp_rect = utils.load_image(r"character\baldric_walk\baldric_walk 1 ("+str(self.counter)+").png", -1)
+            self.image, self.temp_rect = utils.load_image(os.path.join("character","baldric_walk","baldric_walk 1 ("+str(self.counter)+").png"), -1)
         elif direction == "right":
             self.last_direction = "right"
-            self.image, self.temp_rect = utils.load_image(r"character\baldric_walk\baldric_walk 3 ("+str(self.counter)+").png", -1)
+            self.image, self.temp_rect = utils.load_image(os.path.join("character","baldric_walk","baldric_walk 3 ("+str(self.counter)+").png"), -1)
 
     def update(self, keys):
         if keys[pg.K_s]:
@@ -295,7 +294,7 @@ class Player(pg.sprite.Sprite):
 class Mouse(pg.sprite.Sprite):
     def __init__(self, interactable_objects):
         super(Mouse, self).__init__()
-        self.mouse = utils.load_image(r"mouse\default.png")
+        self.mouse = utils.load_image(os.path.join("mouse","default.png"))
         self.mouse_img = pg.transform.smoothscale(self.mouse[0], mouse_size)
         self.interactable_objects = interactable_objects
     def update(self, menu_click=False):

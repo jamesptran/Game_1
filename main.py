@@ -18,10 +18,10 @@ pg.mouse.set_visible(False)
 
 FPS = 60
 FPS_dialog = 25
-world_time = 0
+world_time = 0; world_day = 0; world_month = 0; world_year = 0
 frame_repeater = 8
 time_arg = True; time_thread_count = 0; sleep_arg = False
-time_increment = 15; time_delay = 5
+time_increment = 30; time_delay = 0.5
 clicked = None
 menu = False
 mouse_size = (32,32)
@@ -120,10 +120,12 @@ def dialog_box(msg, text_color, size="small", scroll="no"):
                 quit = True
 
 def display_time(time):
+    global world_day, world_month, world_year
     offset = 120
-    hour = time /60
+    hour = time / 60
     min = time % 60
-    add_text(str(hour).zfill(2)+":"+str(min).zfill(2), pcolor.green, "small", 0, 0, screen_width - offset, 20, "yes")
+    add_text(str(hour).zfill(2)+":"+str(min).zfill(2), pcolor.green, "small", 0, 0, screen_width - 1.5 * offset, 60, "yes")
+    add_text("D:" + str(world_day).zfill(2) + " M:" + str(world_month).zfill(2) + " Y:" + str(world_year).zfill(2), pcolor.green, "small", 0,0, screen_width - 2.5 * offset, 20, "yes")
 
 def menu_box(messages, obj_name, color, num = 4):
     global time_arg, clicked
@@ -164,7 +166,6 @@ def computer():
     paused = True
     result = menu_box(["Hello","this","is","Nevermind"], "computer", pcolor.red, 4)
     if result != None:
-        print result
         menu = False
         paused = False
         time_arg = True
@@ -175,7 +176,6 @@ def study():
     paused = True
     result = menu_box(["Hello", "this", "Nevermind"], "book_case", pcolor.red, 3)
     if result != None:
-        print result
         menu = False
         paused = False
         time_arg = True
@@ -322,13 +322,16 @@ group = pyscroll.PyscrollGroup(map_layer=map_layer)
 group.add(player, layer="Player_layer")
 
 def time_update():
-    global time_arg, world_time, time_thread_count
-    print time_thread_count
+    global time_arg, world_time, time_thread_count, world_day, world_month, world_year
     time_thread_count += 1
     if time_arg == True and time_thread_count <= 2:
-    #if time_arg == True:
         world_time += time_increment
-        world_time = world_time % 720
+        world_day += int(math.floor(world_time/720))
+        world_month += int(math.floor(world_day/30))
+        world_year += int(math.floor(world_month/12))
+        world_day = int(world_day % 30)
+        world_month = int(world_month % 12)
+        world_time %= 720
         t = threading.Timer(time_delay, time_update)
         t.start()
         time.sleep(time_delay)

@@ -5,17 +5,17 @@ import pyscroll
 from pytmx.util_pygame import load_pygame
 import utils, pcolor, dialogs
 
-"""Initialize pygame, create a clock, create the window
-with a surface to blit the map onto."""
+#Initialize pygame and its variables
 screen_width = 600
 screen_height = 800
-paused = False; p_paused = False
 pg.init()
-fps_clock = pg.time.Clock()
 main_surface = pg.display.set_mode((screen_width, screen_height))
 main_rect = main_surface.get_rect()
 pg.mouse.set_visible(False)
 
+#Initialize in-game variables
+fps_clock = pg.time.Clock()
+paused = False; p_paused = False
 FPS = 60
 FPS_dialog = 25
 world_time = 0; world_day = 0; world_month = 0; world_year = 0
@@ -28,25 +28,28 @@ mouse_size = (32,32)
 blockers = []
 interactable_objects = {}
 
+#Load images, mouses, fonts, and the tile map
+#Load mouse images
 default_mouse = utils.load_image(os.path.join("mouse", "default.png"))
 click_mouse = utils.load_image(os.path.join("mouse", "clickable.png"))
 menu_mouse = utils.load_image(os.path.join("mouse", "menu.png"))
-
+#Scale mouse images
 default_mouse = (pg.transform.smoothscale(default_mouse[0], mouse_size), default_mouse[1])
 click_mouse = (pg.transform.smoothscale(click_mouse[0], mouse_size), click_mouse[1])
 menu_mouse = (pg.transform.smoothscale(menu_mouse[0], mouse_size), menu_mouse[1])
-
+#Load menu images
 menu_3 = utils.load_image(os.path.join("menus", "menu_3.png"))
 menu_4 = utils.load_image(os.path.join("menus", "menu_4.png"))
-
+#Load fonts
 smallfont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 20)
 medfont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 35)
 largefont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 50)
-
+#Load the tilemap
 tile_renderer = load_pygame("dorm.tmx")
 map_data = pyscroll.data.TiledMapData(tile_renderer)
 map_layer = pyscroll.BufferedRenderer(map_data, (screen_width,screen_height), clamp_camera=True)
 
+#Store blockers rects in a list named blockers
 for obj in tile_renderer.get_layer_by_name("Blockers"):
     properties = obj.__dict__
     if properties['name'] == 'blocker':
@@ -56,6 +59,8 @@ for obj in tile_renderer.get_layer_by_name("Blockers"):
         height = properties['height']
         new_rect = pg.Rect(x, y, width, height)
         blockers.append(new_rect)
+
+#Store interactable objects rects in a dict named interactable_objects
 for obj in tile_renderer.get_layer_by_name("Objects"):
     properties = obj.__dict__
     x = properties['x']
@@ -65,6 +70,7 @@ for obj in tile_renderer.get_layer_by_name("Objects"):
     new_rect = pg.Rect(x, y, width, height)
     interactable_objects[properties["name"]] = new_rect
 
+#Render a text object - Return text object and its rect
 def text_objects(text, color, size):
     if size == "small":
         font = smallfont
@@ -75,6 +81,7 @@ def text_objects(text, color, size):
     textSurface = font.render(text, True, color)
     return textSurface, textSurface.get_rect()
 
+#Blit the message to the screen
 def add_text(msg, text_color, size="small", x_offset=0,y_offset=0,x_cor=0,y_cor=0,cor="no"):
     textSurf, textRect = text_objects(msg, text_color, size)
     if x_cor == 0 and y_cor == 0 and cor == "no":
@@ -85,6 +92,7 @@ def add_text(msg, text_color, size="small", x_offset=0,y_offset=0,x_cor=0,y_cor=
     main_surface.blit(textSurf, textRect)
     return textRect
 
+#Create a dialog box in the screen
 def dialog_box(msg, text_color, size="small", scroll="no"):
     if size == "small":
         font = smallfont
@@ -119,6 +127,7 @@ def dialog_box(msg, text_color, size="small", scroll="no"):
             if event.type == pg.MOUSEBUTTONDOWN:
                 quit = True
 
+#Display time and date on the screen
 def display_time(time):
     global world_day, world_month, world_year
     offset = 120
@@ -127,6 +136,7 @@ def display_time(time):
     add_text(str(hour).zfill(2)+":"+str(min).zfill(2), pcolor.green, "small", 0, 0, screen_width - 1.5 * offset, 60, "yes")
     add_text("D:" + str(world_day).zfill(2) + " M:" + str(world_month).zfill(2) + " Y:" + str(world_year).zfill(2), pcolor.green, "small", 0,0, screen_width - 2.5 * offset, 20, "yes")
 
+#Blit a menu box with options on the screen
 def menu_box(messages, obj_name, color, num = 4):
     global time_arg, clicked
     x_offset = 30
@@ -154,6 +164,16 @@ def menu_box(messages, obj_name, color, num = 4):
             result = msg
     return result
 
+#Decides with interactive function to call
+def mouse_click_process(obj_name):
+    if obj_name == "bed":
+        sleep()
+    elif obj_name == "computer":
+        computer()
+    elif obj_name == "book_case":
+        study()
+
+#Increment time - simulate sleeping
 def sleep():
     global world_time, sleep_arg
     if sleep_arg == True:
@@ -161,6 +181,7 @@ def sleep():
         world_time += sleep_increment
     sleep_arg = False
 
+#Interactions with the computer
 def computer():
     global paused, clicked, menu, time_arg
     paused = True
@@ -171,6 +192,7 @@ def computer():
         time_arg = True
         threading.Timer(1, time_update).start()
 
+#Interactions with the bookcase
 def study():
     global paused, clicked, menu, time_arg
     paused = True
@@ -181,14 +203,7 @@ def study():
         time_arg = True
         threading.Timer(1, time_update).start()
 
-def mouse_click_process(obj_name):
-    if obj_name == "bed":
-        sleep()
-    elif obj_name == "computer":
-        computer()
-    elif obj_name == "book_case":
-        study()
-
+#Player methods and attributes
 class Player(pg.sprite.Sprite):
     def __init__(self, blockers):
         super(Player, self).__init__()
@@ -291,6 +306,7 @@ class Player(pg.sprite.Sprite):
             self.collision_rect[1] -= self.y_vel
             self.y_vel = 0
 
+#Change mouse images
 class Mouse(pg.sprite.Sprite):
     def __init__(self, interactable_objects):
         super(Mouse, self).__init__()
@@ -305,7 +321,7 @@ class Mouse(pg.sprite.Sprite):
             self.mouse_img = menu_mouse[0]
             return None
         for name, clickable in self.interactable_objects.iteritems():
-            if pg.Rect(mouse_world_pos, mouse_size).colliderect(clickable):
+            if clickable.collidepoint(mouse_world_pos):
                 self.mouse = click_mouse
                 self.mouse_img = click_mouse[0]
                 return name
@@ -316,11 +332,7 @@ class Mouse(pg.sprite.Sprite):
     def click(self, name):
         mouse_click_process(name)
 
-player = Player(blockers)
-mouse = Mouse(interactable_objects)
-group = pyscroll.PyscrollGroup(map_layer=map_layer)
-group.add(player, layer="Player_layer")
-
+#Increment the time
 def time_update():
     global time_arg, world_time, time_thread_count, world_day, world_month, world_year
     time_thread_count += 1
@@ -337,7 +349,13 @@ def time_update():
         time.sleep(time_delay)
     time_thread_count -= 1
 
+#Initialize player, mouse, and group (for scrolling features)
+player = Player(blockers)
+mouse = Mouse(interactable_objects)
+group = pyscroll.PyscrollGroup(map_layer=map_layer)
+group.add(player, layer="Player_layer")
 
+#Main game loop
 def main():
     global paused, time_arg, world_time, p_paused, sleep_arg, menu, clicked
     #dialog_box(dialogs.opening_msg, pcolor.yellow)

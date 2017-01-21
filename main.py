@@ -12,9 +12,9 @@ pg.init()
 main_surface = pg.display.set_mode((screen_width, screen_height))
 main_rect = main_surface.get_rect()
 pg.mouse.set_visible(False)
+fps_clock = pg.time.Clock()
 
 #Initialize in-game variables
-fps_clock = pg.time.Clock()
 paused = False; p_paused = False
 FPS = 60
 FPS_dialog = 25
@@ -22,7 +22,7 @@ world_time = 0; world_day = 0; world_month = 0; world_year = 0
 frame_repeater = 8
 time_arg = True; time_thread_count = 0; sleep_arg = False
 time_increment = 30; time_delay = 0.5
-clicked = None
+mouse_clicked_pos = None
 menu = False
 mouse_size = (32,32)
 blockers = []
@@ -138,7 +138,7 @@ def display_time(time):
 
 #Blit a menu box with options on the screen
 def menu_box(messages, obj_name, color, num = 4):
-    global time_arg, clicked
+    global time_arg, mouse_clicked_pos
     x_offset = 30
     y_offset = 40
     time_arg = False
@@ -160,7 +160,7 @@ def menu_box(messages, obj_name, color, num = 4):
         if rect.collidepoint(mouse_pos):
             add_text(msg, pcolor.blue, "small", 0, 0, position[0] + x_offset,
                         position[1] + (menu_4[1][3] - y_offset) / 4 * index + y_offset, "yes")
-        if clicked != None and rect.collidepoint(clicked):
+        if mouse_clicked_pos != None and rect.collidepoint(mouse_clicked_pos):
             result = msg
     return result
 
@@ -183,7 +183,7 @@ def sleep():
 
 #Interactions with the computer
 def computer():
-    global paused, clicked, menu, time_arg
+    global paused, mouse_clicked_pos, menu, time_arg
     paused = True
     result = menu_box(["Hello","this","is","Nevermind"], "computer", pcolor.red, 4)
     if result != None:
@@ -194,7 +194,7 @@ def computer():
 
 #Interactions with the bookcase
 def study():
-    global paused, clicked, menu, time_arg
+    global paused, mouse_clicked_pos, menu, time_arg
     paused = True
     result = menu_box(["Hello", "this", "Nevermind"], "book_case", pcolor.red, 3)
     if result != None:
@@ -357,7 +357,7 @@ group.add(player, layer="Player_layer")
 
 #Main game loop
 def main():
-    global paused, time_arg, world_time, p_paused, sleep_arg, menu, clicked
+    global paused, time_arg, world_time, p_paused, sleep_arg, menu, mouse_clicked_pos
     #dialog_box(dialogs.opening_msg, pcolor.yellow)
     threading.Timer(time_delay, time_update).start()
     while True:
@@ -373,7 +373,7 @@ def main():
             if event.type == pg.MOUSEMOTION and paused == False:
                 obj_name = mouse.update()
             if event.type == pg.MOUSEBUTTONDOWN:
-                clicked = pg.mouse.get_pos()
+                mouse_clicked_pos = pg.mouse.get_pos()
                 if obj_name != None and player.collision_rect.colliderect((interactable_objects[obj_name][0]-map_data.tile_size[0],interactable_objects[obj_name][1]-map_data.tile_size[1]),
                                                          (interactable_objects[obj_name][2]+map_data.tile_size[0]*2,interactable_objects[obj_name][3]+map_data.tile_size[1]*2))\
                         and paused == False:
@@ -400,7 +400,7 @@ def main():
             mouse.click(menu_obj)
         main_surface.blit(mouse.mouse_img, pg.mouse.get_pos())
         pg.display.update()
-        clicked = None
+        mouse_clicked_pos = None
 
 if __name__ == "__main__":
     main()

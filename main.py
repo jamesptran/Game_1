@@ -7,7 +7,7 @@ import utils, pcolor, dialogs
 
 #Initialize pygame and its variables
 screen_width = 600
-screen_height = 800
+screen_height = 600
 pg.init()
 main_surface = pg.display.set_mode((screen_width, screen_height))
 main_rect = main_surface.get_rect()
@@ -94,36 +94,47 @@ def add_text(msg, text_color, size="small", x_offset=0,y_offset=0,x_cor=0,y_cor=
 
 #Create a dialog box in the screen
 def dialog_box(msg, text_color, size="small", scroll="no"):
+    global FPS_dialog
     if size == "small":
         font = smallfont
     if size == "med":
         font = medfont
     if size == "large":
         font = largefont
-    quit = False
+    skip = False
     text_offset = 30
-    dialog, dialog_rect = utils.load_image(r"dialog\Dialog Box.png")
+    dialog, dialog_rect = utils.load_image(os.path.join("dialog","Dialog Box.png"))
     dialog = pg.transform.smoothscale(dialog, (screen_width, dialog_rect[3]*2))
     msg = dialogs.wrapline(msg, font, screen_width - 2*text_offset)
     line_height = 0
     completed_lines = []
     for line in msg:
-        for i in range(len(line)+1):
-            main_surface.blit(dialog, (0, screen_height - dialog_rect[3] * 2))
-            for index, line_2 in enumerate(completed_lines):
-                add_text(line_2, text_color, "small", 0, 0, 0 + text_offset,
-                         screen_height - dialog_rect[3] * 2 + text_offset + font.get_height()*index, "yes")
-            add_text(line[0:i], text_color, "small", 0, 0, 0 + text_offset,
-                        screen_height-dialog_rect[3]*2+text_offset + line_height,"yes")
-            pg.display.update()
-            fps_clock.tick(FPS_dialog)
+        if skip == False:
+            for i in range(len(line)+1):
+                main_surface.blit(dialog, (0, screen_height - dialog_rect[3] * 2))
+                for index, line_2 in enumerate(completed_lines):
+                    add_text(line_2, text_color, "small", 0, 0, 0 + text_offset,
+                             screen_height - dialog_rect[3] * 2 + text_offset + font.get_height()*index, "yes")
+                add_text(line[0:i], text_color, "small", 0, 0, 0 + text_offset,
+                            screen_height-dialog_rect[3]*2+text_offset + line_height,"yes")
+                pg.display.update()
+                fps_clock.tick(FPS_dialog)
+                for event in pg.event.get():
+                    if event.type == pg.QUIT:
+                        pg.quit()
+                        sys.exit()
+                    if event.type == pg.MOUSEBUTTONDOWN:
+                        skip = True
+        else:
+            add_text(line, text_color, "small", 0, 0, 0 + text_offset,
+                     screen_height - dialog_rect[3] * 2 + text_offset + line_height, "yes")
+
         completed_lines.append(line)
         line_height += font.get_height()
+        pg.display.update()
+    quit = False
     while quit == False:
         for event in pg.event.get():
-            if event.type == pg.QUIT:
-                pg.quit()
-                sys.exit()
             if event.type == pg.MOUSEBUTTONDOWN:
                 quit = True
 
@@ -310,24 +321,20 @@ class Player(pg.sprite.Sprite):
 class Mouse(pg.sprite.Sprite):
     def __init__(self, interactable_objects):
         super(Mouse, self).__init__()
-        self.mouse = utils.load_image(os.path.join("mouse","default.png"))
-        self.mouse_img = pg.transform.smoothscale(self.mouse[0], mouse_size)
+        self.mouse_img = default_mouse
         self.interactable_objects = interactable_objects
     def update(self, menu_click=False):
         mouse_world_pos = (pg.mouse.get_pos()[0] + map_layer.view_rect.center[0] - screen_width / 2,
                            pg.mouse.get_pos()[1] + map_layer.view_rect.center[1] - screen_height / 2)
         if menu_click == True:
-            self.mouse = menu_mouse
-            self.mouse_img = menu_mouse[0]
+            self.mouse_img = menu_mouse
             return None
-        for name, clickable in self.interactable_objects.iteritems():
-            if clickable.collidepoint(mouse_world_pos):
-                self.mouse = click_mouse
-                self.mouse_img = click_mouse[0]
+        for name, clickable_rect in self.interactable_objects.iteritems():
+            if clickable_rect.collidepoint(mouse_world_pos):
+                self.mouse_img = click_mouse
                 return name
             else:
-                self.mouse = default_mouse
-                self.mouse_img = default_mouse[0]
+                self.mouse_img = default_mouse
         return None
     def click(self, name):
         mouse_click_process(name)
@@ -358,7 +365,7 @@ group.add(player, layer="Player_layer")
 #Main game loop
 def main():
     global paused, time_arg, world_time, p_paused, sleep_arg, menu, mouse_clicked_pos
-    #dialog_box(dialogs.opening_msg, pcolor.yellow)
+    dialog_box(dialogs.opening_msg, pcolor.yellow)
     threading.Timer(time_delay, time_update).start()
     while True:
         keys = pg.key.get_pressed()
@@ -398,7 +405,7 @@ def main():
             add_text("PAUSED", pcolor.green, "large", 0, 0)
         if menu == True:
             mouse.click(menu_obj)
-        main_surface.blit(mouse.mouse_img, pg.mouse.get_pos())
+        main_surface.blit(mouse.mouse_img[0], pg.mouse.get_pos())
         pg.display.update()
         mouse_clicked_pos = None
 

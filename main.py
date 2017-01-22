@@ -16,12 +16,12 @@ fps_clock = pg.time.Clock()
 
 #Initialize in-game variables
 paused = False; p_paused = False
-FPS = 60
-FPS_dialog = 25
+FPS = 60; FPS_dialog = 25; FPS_action = 5;
 world_time = 0; world_day = 0; world_month = 0; world_year = 0
+time_rect = None; date_rect = None
 frame_repeater = 8
 time_arg = True; time_thread_count = 0; sleep_arg = False
-time_increment = 30; time_delay = 0.5
+time_increment_amount = 30; time_delay = 0.5
 mouse_clicked_pos = None
 menu = False
 mouse_size = (32,32)
@@ -41,9 +41,9 @@ menu_mouse = (pg.transform.smoothscale(menu_mouse[0], mouse_size), menu_mouse[1]
 menu_3 = utils.load_image(os.path.join("menus", "menu_3.png"))
 menu_4 = utils.load_image(os.path.join("menus", "menu_4.png"))
 #Load fonts
-smallfont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 20)
-medfont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 35)
-largefont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 50)
+smallfont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 15)
+medfont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 20)
+largefont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 25)
 #Load the tilemap
 tile_renderer = load_pygame("dorm.tmx")
 map_data = pyscroll.data.TiledMapData(tile_renderer)
@@ -93,7 +93,7 @@ def add_text(msg, text_color, size="small", x_offset=0,y_offset=0,x_cor=0,y_cor=
     return textRect
 
 #Create a dialog box in the screen
-def dialog_box(msg, text_color, size="small", scroll="no"):
+def dialog_box(msg, text_color, size="med", scroll="no"):
     global FPS_dialog
     if size == "small":
         font = smallfont
@@ -113,9 +113,9 @@ def dialog_box(msg, text_color, size="small", scroll="no"):
             for i in range(len(line)+1):
                 main_surface.blit(dialog, (0, screen_height - dialog_rect[3] * 2))
                 for index, line_2 in enumerate(completed_lines):
-                    add_text(line_2, text_color, "small", 0, 0, 0 + text_offset,
+                    add_text(line_2, text_color, size, 0, 0, 0 + text_offset,
                              screen_height - dialog_rect[3] * 2 + text_offset + font.get_height()*index, "yes")
-                add_text(line[0:i], text_color, "small", 0, 0, 0 + text_offset,
+                add_text(line[0:i], text_color, size, 0, 0, 0 + text_offset,
                             screen_height-dialog_rect[3]*2+text_offset + line_height,"yes")
                 pg.display.update()
                 fps_clock.tick(FPS_dialog)
@@ -126,7 +126,7 @@ def dialog_box(msg, text_color, size="small", scroll="no"):
                     if event.type == pg.MOUSEBUTTONDOWN:
                         skip = True
         else:
-            add_text(line, text_color, "small", 0, 0, 0 + text_offset,
+            add_text(line, text_color, size, 0, 0, 0 + text_offset,
                      screen_height - dialog_rect[3] * 2 + text_offset + line_height, "yes")
 
         completed_lines.append(line)
@@ -138,14 +138,30 @@ def dialog_box(msg, text_color, size="small", scroll="no"):
             if event.type == pg.MOUSEBUTTONDOWN:
                 quit = True
 
+#Function to clear to space where time is displayed
+def clear_time():
+    offset = 120
+    pg.draw.rect(main_surface,pcolor.black,time_rect)
+    pg.draw.rect(main_surface,pcolor.black,date_rect)
+
 #Display time and date on the screen
 def display_time(time):
-    global world_day, world_month, world_year
+    global world_day, world_month, world_year, date_rect, time_rect
     offset = 120
     hour = time / 60
     min = time % 60
-    add_text(str(hour).zfill(2)+":"+str(min).zfill(2), pcolor.green, "small", 0, 0, screen_width - 1.5 * offset, 60, "yes")
-    add_text("D:" + str(world_day).zfill(2) + " M:" + str(world_month).zfill(2) + " Y:" + str(world_year).zfill(2), pcolor.green, "small", 0,0, screen_width - 2.5 * offset, 20, "yes")
+    time_rect = add_text(str(hour).zfill(2)+":"+str(min).zfill(2), pcolor.green, "small", 0, 0, screen_width - 1.5 * offset, 60, "yes")
+    date_rect = add_text("D:" + str(world_day).zfill(2) + " M:" + str(world_month).zfill(2) + " Y:" + str(world_year).zfill(2), pcolor.green, "small", 0,0, screen_width - 2.5 * offset, 20, "yes")
+
+#Incrementing time func - time amount*10
+def time_increment(time_amount):
+    global world_time, FPS_action
+    for i in range(time_amount):
+        world_time += 10
+        fps_clock.tick(FPS_action)
+        clear_time()
+        display_time(world_time)
+        pg.display.update()
 
 #Blit a menu box with options on the screen
 def menu_box(messages, obj_name, color, num = 4):
@@ -176,16 +192,16 @@ def menu_box(messages, obj_name, color, num = 4):
     return result
 
 #Decides with interactive function to call
-def mouse_click_process(obj_name):
+def mouse_click_process(obj_name, player):
     if obj_name == "bed":
-        sleep()
+        sleep(player)
     elif obj_name == "computer":
-        computer()
+        computer(player)
     elif obj_name == "book_case":
-        study()
+        study(player)
 
 #Increment time - simulate sleeping
-def sleep():
+def sleep(player):
     global world_time, sleep_arg
     if sleep_arg == True:
         sleep_increment = 100
@@ -193,7 +209,7 @@ def sleep():
     sleep_arg = False
 
 #Interactions with the computer
-def computer():
+def computer(player):
     global paused, mouse_clicked_pos, menu, time_arg
     paused = True
     result = menu_box(["Hello","this","is","Nevermind"], "computer", pcolor.red, 4)
@@ -204,10 +220,14 @@ def computer():
         threading.Timer(1, time_update).start()
 
 #Interactions with the bookcase
-def study():
+def study(player):
     global paused, mouse_clicked_pos, menu, time_arg
     paused = True
-    result = menu_box(["Hello", "this", "Nevermind"], "book_case", pcolor.red, 3)
+    result = menu_box(["Read Art Book", "Read Coding Book", "Nevermind"], "book_case", pcolor.red, 3)
+    if result == "Read Art Book":
+        player.creativity += 5
+        player.energy -= 20
+        time_increment(12)
     if result != None:
         menu = False
         paused = False
@@ -237,6 +257,12 @@ class Player(pg.sprite.Sprite):
         self.moving = False
         self.frame_repeater = 0
         self.speed = 3
+
+        #Skills and energy
+        self.coding = 0;
+        self.creativity = 0;
+        self.energy = 100;
+        self.max_energy = 100;
 
     def update_gold(self, amount):
         self.gold += amount
@@ -336,15 +362,15 @@ class Mouse(pg.sprite.Sprite):
             else:
                 self.mouse_img = default_mouse
         return None
-    def click(self, name):
-        mouse_click_process(name)
+    def click(self, name, player):
+        mouse_click_process(name, player)
 
 #Increment the time
 def time_update():
-    global time_arg, world_time, time_thread_count, world_day, world_month, world_year
+    global time_arg, world_time, time_thread_count, world_day, world_month, world_year, time_increment_amount
     time_thread_count += 1
     if time_arg == True and time_thread_count <= 2:
-        world_time += time_increment
+        world_time += time_increment_amount
         world_day += int(math.floor(world_time/720))
         world_month += int(math.floor(world_day/30))
         world_year += int(math.floor(world_month/12))
@@ -404,8 +430,9 @@ def main():
         if paused == True and p_paused == True:
             add_text("PAUSED", pcolor.green, "large", 0, 0)
         if menu == True:
-            mouse.click(menu_obj)
+            mouse.click(menu_obj, player)
         main_surface.blit(mouse.mouse_img[0], pg.mouse.get_pos())
+        add_text(str(player.energy)+"/"+str(player.max_energy),pcolor.red,"small",0,0,200,100,"yes")
         pg.display.update()
         mouse_clicked_pos = None
 

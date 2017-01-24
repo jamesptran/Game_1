@@ -147,11 +147,11 @@ def clear_time():
 #Display time and date on the screen
 def display_time(time):
     global world_day, world_month, world_year, date_rect, time_rect
-    offset = 120
+    offset = 60
     hour = time / 60
     min = time % 60
     time_rect = add_text(str(hour).zfill(2)+":"+str(min).zfill(2), pcolor.green, "small", 0, 0, screen_width - 1.5 * offset, 60, "yes")
-    date_rect = add_text("D:" + str(world_day).zfill(2) + " M:" + str(world_month).zfill(2) + " Y:" + str(world_year).zfill(2), pcolor.green, "small", 0,0, screen_width - 2.5 * offset, 20, "yes")
+    date_rect = add_text("D:" + str(world_day).zfill(2) + " M:" + str(world_month).zfill(2) + " Y:" + str(world_year).zfill(2), pcolor.green, "small", 0,0, screen_width - 3.5 * offset, 20, "yes")
 
 #Incrementing time func - time amount*10
 def time_increment(time_amount):
@@ -391,6 +391,7 @@ group.add(player, layer="Player_layer")
 #Main game loop
 def main():
     global paused, time_arg, world_time, p_paused, sleep_arg, menu, mouse_clicked_pos
+    offset = 120
     dialog_box(dialogs.opening_msg, pcolor.yellow)
     threading.Timer(time_delay, time_update).start()
     while True:
@@ -425,14 +426,14 @@ def main():
                     p_paused = False
                     threading.Timer(time_delay, time_update).start()
         group.draw(main_surface)
-        add_text("$" + str(player.gold), pcolor.green, "small", 0, 0, 0, 20, "yes")
+        add_text("$" + str(player.gold), pcolor.green, "small", 0, 0, 10, 20, "yes")
+        add_text("Energy: " + str(player.energy)+"/"+str(player.max_energy),pcolor.red,"small",0,-offset)
         display_time(world_time)
         if paused == True and p_paused == True:
             add_text("PAUSED", pcolor.green, "large", 0, 0)
         if menu == True:
             mouse.click(menu_obj, player)
         main_surface.blit(mouse.mouse_img[0], pg.mouse.get_pos())
-        add_text(str(player.energy)+"/"+str(player.max_energy),pcolor.red,"small",0,0,200,100,"yes")
         pg.display.update()
         mouse_clicked_pos = None
 

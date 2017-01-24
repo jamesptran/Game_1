@@ -25,6 +25,7 @@ time_increment_amount = 30; time_delay = 0.5
 mouse_clicked_pos = None
 menu = False
 mouse_size = (32,32)
+mouse_pos_x_offset = 10 #variable to offset the position of the mouse in x axis
 blockers = []
 interactable_objects = {}
 
@@ -139,7 +140,7 @@ def dialog_box(msg, text_color, size="med", scroll="no"):
                 quit = True
 
 #Function to clear to space where time is displayed
-def clear_time():
+def clear_time_blocks():
     offset = 120
     pg.draw.rect(main_surface,pcolor.black,time_rect)
     pg.draw.rect(main_surface,pcolor.black,date_rect)
@@ -159,12 +160,12 @@ def time_increment(time_amount):
     for i in range(time_amount):
         world_time += 10
         fps_clock.tick(FPS_action)
-        clear_time()
+        clear_time_blocks()
         display_time(world_time)
         pg.display.update()
 
 #Blit a menu box with options on the screen
-def menu_box(messages, obj_name, color, num = 4):
+def menu_box(messages, obj_name, color, option_num = 4):
     global time_arg, mouse_clicked_pos
     x_offset = 30
     y_offset = 40
@@ -173,9 +174,9 @@ def menu_box(messages, obj_name, color, num = 4):
     result = None
     position = (interactable_objects[obj_name][2] + map_layer.get_center_offset()[0],
                 interactable_objects[obj_name][3] + map_layer.get_center_offset()[1])
-    if num == 4:
+    if option_num == 4:
         menu_rect = main_surface.blit(menu_4[0], position)
-    if num == 3:
+    if option_num == 3:
         menu_rect = main_surface.blit(menu_3[0], position)
     for index, msg in enumerate(messages):
         rect = add_text(msg,color, "small",0,0,position[0]+x_offset,
@@ -390,8 +391,8 @@ group.add(player, layer="Player_layer")
 
 #Main game loop
 def main():
-    global paused, time_arg, world_time, p_paused, sleep_arg, menu, mouse_clicked_pos
-    offset = 120
+    global paused, time_arg, world_time, p_paused, sleep_arg, menu, mouse_clicked_pos, mouse_pos_x_offset
+    energy_bar_offset = 240
     dialog_box(dialogs.opening_msg, pcolor.yellow)
     threading.Timer(time_delay, time_update).start()
     while True:
@@ -427,13 +428,14 @@ def main():
                     threading.Timer(time_delay, time_update).start()
         group.draw(main_surface)
         add_text("$" + str(player.gold), pcolor.green, "small", 0, 0, 10, 20, "yes")
-        add_text("Energy: " + str(player.energy)+"/"+str(player.max_energy),pcolor.red,"small",0,-offset)
+        add_text(str(player.energy)+"/"+str(player.max_energy),pcolor.red,"small",0,-energy_bar_offset)
         display_time(world_time)
         if paused == True and p_paused == True:
             add_text("PAUSED", pcolor.green, "large", 0, 0)
         if menu == True:
             mouse.click(menu_obj, player)
-        main_surface.blit(mouse.mouse_img[0], pg.mouse.get_pos())
+        #BLit mouse image to the screen
+        main_surface.blit(mouse.mouse_img[0], (pg.mouse.get_pos()[0]-mouse_pos_x_offset,pg.mouse.get_pos()[1]))
         pg.display.update()
         mouse_clicked_pos = None
 

@@ -16,7 +16,7 @@ fps_clock = pg.time.Clock()
 
 #Initialize in-game variables
 paused = False; p_paused = False
-FPS = 60; FPS_dialog = 25; FPS_action = 5;
+FPS = 60; FPS_dialog = 25; FPS_action = 10;
 world_time = 0; world_day = 0; world_month = 0; world_year = 0
 time_rect = None; date_rect = None
 frame_repeater = 8
@@ -383,6 +383,30 @@ def time_update():
         time.sleep(time_delay)
     time_thread_count -= 1
 
+#Display time, money, and energy
+def display_time_energy(max_energy, energy):
+    #Initialize variables for energy bars
+    energy_bar_line_width = 5
+    energy_bar_max_width = 200
+    energy_bar_max_height = 30
+    energy_bar_height = energy_bar_max_height - energy_bar_line_width*2
+    energy_bar_width = (energy_bar_max_width - energy_bar_line_width*2)*(float(energy)/float(max_energy))
+    energy_bar_offset = 3*screen_height/8
+    energy_text_offset = energy_bar_offset-energy_bar_max_height
+    #Create rect objects for energy bars
+    energy_max_rect = pg.Rect(0,0,energy_bar_max_width,energy_bar_max_height)
+    energy_rect = pg.Rect(0,0,energy_bar_width,energy_bar_height)
+    #Position energy bars
+    energy_rect.center = (screen_width/2) - (energy_bar_max_width-energy_bar_width-2*energy_bar_line_width)/2, (screen_height/2)-energy_bar_offset
+    energy_max_rect.center = (screen_width/2), (screen_height/2)-energy_bar_offset
+    #Draw to the screen
+    pg.draw.rect(main_surface,pcolor.blue,energy_rect)
+    pg.draw.rect(main_surface,pcolor.red,energy_max_rect,energy_bar_line_width)
+    add_text("$" + str(player.gold), pcolor.green, "small", 0, 0, 10, 20, "yes")
+    add_text(str(player.energy) + "/" + str(player.max_energy), pcolor.red, "small", 0, -energy_text_offset)
+
+    display_time(world_time)
+
 #Initialize player, mouse, and group (for scrolling features)
 player = Player(blockers)
 mouse = Mouse(interactable_objects)
@@ -392,7 +416,6 @@ group.add(player, layer="Player_layer")
 #Main game loop
 def main():
     global paused, time_arg, world_time, p_paused, sleep_arg, menu, mouse_clicked_pos, mouse_pos_x_offset
-    energy_bar_offset = 240
     dialog_box(dialogs.opening_msg, pcolor.yellow)
     threading.Timer(time_delay, time_update).start()
     while True:
@@ -427,9 +450,7 @@ def main():
                     p_paused = False
                     threading.Timer(time_delay, time_update).start()
         group.draw(main_surface)
-        add_text("$" + str(player.gold), pcolor.green, "small", 0, 0, 10, 20, "yes")
-        add_text(str(player.energy)+"/"+str(player.max_energy),pcolor.red,"small",0,-energy_bar_offset)
-        display_time(world_time)
+        display_time_energy(player.max_energy,player.energy)
         if paused == True and p_paused == True:
             add_text("PAUSED", pcolor.green, "large", 0, 0)
         if menu == True:

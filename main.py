@@ -5,6 +5,8 @@ import pyscroll
 from pytmx.util_pygame import load_pygame
 import utils, pcolor, dialogs
 
+__author__ = "Lam Nguyen"
+
 #Initialize pygame and its variables
 screen_width = 600
 screen_height = 600
@@ -151,8 +153,10 @@ def display_time(time):
     offset = 60
     hour = time / 60
     min = time % 60
-    time_rect = add_text(str(hour).zfill(2)+":"+str(min).zfill(2), pcolor.green, "small", 0, 0, screen_width - 1.5 * offset, 60, "yes")
-    date_rect = add_text("D:" + str(world_day).zfill(2) + " M:" + str(world_month).zfill(2) + " Y:" + str(world_year).zfill(2), pcolor.green, "small", 0,0, screen_width - 3.5 * offset, 20, "yes")
+    #time_rect = add_text(str(hour).zfill(2)+":"+str(min).zfill(2), pcolor.green, "small", 0, 0, screen_width - 1.5 * offset, 60, "yes")
+    time_rect = add_text(str(hour).zfill(2)+":"+str(min).zfill(2), pcolor.green, "small", 0, 0, 10, 50, "yes")
+    #date_rect = add_text("D:" + str(world_day).zfill(2) + " M:" + str(world_month).zfill(2) + " Y:" + str(world_year).zfill(2), pcolor.green, "small", 0,0, screen_width - 3.5 * offset, 20, "yes")
+    date_rect = add_text("D:" + str(world_day).zfill(2) + " M:" + str(world_month).zfill(2) + " Y:" + str(world_year).zfill(2), pcolor.green, "small", 0,0, 10, 20, "yes")
 
 #Incrementing time func - time amount*10
 def time_increment(time_amount):
@@ -385,25 +389,31 @@ def time_update():
 
 #Display time, money, and energy
 def display_time_energy(max_energy, energy):
+    money_offset = 80
     #Initialize variables for energy bars
     energy_bar_line_width = 5
-    energy_bar_max_width = 200
-    energy_bar_max_height = 30
-    energy_bar_height = energy_bar_max_height - energy_bar_line_width*2
-    energy_bar_width = (energy_bar_max_width - energy_bar_line_width*2)*(float(energy)/float(max_energy))
-    energy_bar_offset = 3*screen_height/8
-    energy_text_offset = energy_bar_offset-energy_bar_max_height
+    energy_bar_max_width = 30
+    energy_bar_max_height = 200
+    energy_bar_height = (energy_bar_max_height - energy_bar_line_width*2)*(float(energy)/float(max_energy))
+    energy_bar_width = energy_bar_max_width - energy_bar_line_width*2
+    energy_bar_offset = screen_height/10
+    energy_text_offset = 20
     #Create rect objects for energy bars
     energy_max_rect = pg.Rect(0,0,energy_bar_max_width,energy_bar_max_height)
     energy_rect = pg.Rect(0,0,energy_bar_width,energy_bar_height)
     #Position energy bars
-    energy_rect.center = (screen_width/2) - (energy_bar_max_width-energy_bar_width-2*energy_bar_line_width)/2, (screen_height/2)-energy_bar_offset
-    energy_max_rect.center = (screen_width/2), (screen_height/2)-energy_bar_offset
+    energy_max_rect.bottomleft = screen_width/10, screen_height-energy_bar_offset
+    energy_rect.bottomleft = (screen_width/10) + energy_bar_line_width, \
+                             screen_height-energy_bar_offset-energy_bar_line_width
     #Draw to the screen
     pg.draw.rect(main_surface,pcolor.blue,energy_rect)
     pg.draw.rect(main_surface,pcolor.red,energy_max_rect,energy_bar_line_width)
-    add_text("$" + str(player.gold), pcolor.green, "small", 0, 0, 10, 20, "yes")
-    add_text(str(player.energy) + "/" + str(player.max_energy), pcolor.red, "small", 0, -energy_text_offset)
+    add_text("$" + str(player.gold), pcolor.green, "small", 0, 0, screen_width-money_offset, 20, "yes")
+    #Add energy text
+    textSurf, textRect = text_objects(str(player.energy) + "/" + str(player.max_energy), pcolor.red, "small")
+    textRect.center = energy_max_rect.center
+    textRect.top = energy_max_rect.bottom + energy_text_offset
+    main_surface.blit(textSurf,textRect)
 
     display_time(world_time)
 

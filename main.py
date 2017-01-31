@@ -147,6 +147,13 @@ def clear_time_blocks():
     pg.draw.rect(main_surface,pcolor.black,time_rect)
     pg.draw.rect(main_surface,pcolor.black,date_rect)
 
+#Clean up the screen
+def screen_clean_up():
+    #group.center(player.rect.center)
+    group.draw(main_surface)
+    display_time_energy(player)
+    display_skills(player)
+
 #Display time and date on the screen
 def display_time(time):
     global world_day, world_month, world_year, date_rect, time_rect
@@ -229,10 +236,13 @@ def study(player):
     global paused, mouse_clicked_pos, menu, time_arg
     paused = True
     result = menu_box(["Read Art Book", "Read Coding Book", "Nevermind"], "book_case", pcolor.red, 3)
-    if result == "Read Art Book":
+    if result == "Read Art Book" and player.energy >= 20:
+        screen_clean_up()
         player.creativity += 5
         player.energy -= 20
         time_increment(12)
+    elif player.energy < 20:
+        print("Low energy warning!")
     if result != None:
         menu = False
         paused = False
@@ -388,13 +398,13 @@ def time_update():
     time_thread_count -= 1
 
 #Display time, money, and energy
-def display_time_energy(max_energy, energy):
+def display_time_energy(player):
     money_offset = 80
     #Initialize variables for energy bars
     energy_bar_line_width = 5
     energy_bar_max_width = 30
     energy_bar_max_height = 200
-    energy_bar_height = (energy_bar_max_height - energy_bar_line_width*2)*(float(energy)/float(max_energy))
+    energy_bar_height = (energy_bar_max_height - energy_bar_line_width*2)*(float(player.energy)/float(player.max_energy))
     energy_bar_width = energy_bar_max_width - energy_bar_line_width*2
     energy_bar_offset = screen_height/10
     energy_text_offset = 20
@@ -417,11 +427,18 @@ def display_time_energy(max_energy, energy):
 
     display_time(world_time)
 
+#Display skills
+def display_skills(player):
+    offset=30
+    add_text("Coding:"+str(player.coding),pcolor.red,"small",0,0,5*screen_width/8,screen_height/2-offset)
+    add_text("Creativity:"+str(player.creativity),pcolor.red,"small",0,0,5*screen_width/8,screen_height/2)
+
 #Initialize player, mouse, and group (for scrolling features)
 player = Player(blockers)
 mouse = Mouse(interactable_objects)
 group = pyscroll.PyscrollGroup(map_layer=map_layer)
 group.add(player, layer="Player_layer")
+group.center(player.rect.center)
 
 #Main game loop
 def main():
@@ -432,7 +449,7 @@ def main():
         keys = pg.key.get_pressed()
         if paused == False:
             player.update(keys)
-            group.center(player.rect.center)
+            #group.center(player.rect.center)
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 time_arg = False
@@ -460,7 +477,8 @@ def main():
                     p_paused = False
                     threading.Timer(time_delay, time_update).start()
         group.draw(main_surface)
-        display_time_energy(player.max_energy,player.energy)
+        display_time_energy(player)
+        display_skills(player)
         if paused == True and p_paused == True:
             add_text("PAUSED", pcolor.green, "large", 0, 0)
         if menu == True:

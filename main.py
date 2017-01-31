@@ -167,9 +167,9 @@ def display_time(time):
 
 #Incrementing time func - time amount*10
 def time_increment(time_amount):
-    global world_time, FPS_action
+    global world_time, FPS_action, time_increment_amount
     for i in range(time_amount):
-        world_time += 10
+        world_time += time_increment_amount
         fps_clock.tick(FPS_action)
         clear_time_blocks()
         display_time(world_time)
@@ -238,9 +238,20 @@ def study(player):
     result = menu_box(["Read Art Book", "Read Coding Book", "Nevermind"], "book_case", pcolor.red, 3)
     if result == "Read Art Book" and player.energy >= 20:
         screen_clean_up()
+        for i in range(20):
+            screen_clean_up()
+            player.energy -= 1
+            display_time_energy(player)
+            time_increment(1)
         player.creativity += 5
-        player.energy -= 20
-        time_increment(12)
+    elif result == "Read Coding Book" and player.energy >= 20:
+        screen_clean_up()
+        for i in range(20):
+            screen_clean_up()
+            player.energy -= 1
+            display_time_energy(player)
+            time_increment(1)
+        player.coding += 5
     elif player.energy < 20:
         print("Low energy warning!")
     if result != None:

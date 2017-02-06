@@ -221,12 +221,8 @@ def sleep(player):
     if sleep_arg == True:
         sleep_increment = 100
         world_time += sleep_increment
-<<<<<<< Updated upstream
         if player.energy + 20 <= 100:
             player.energy += 20
-=======
-        player.energy += 50
->>>>>>> Stashed changes
     sleep_arg = False
 
 #Interactions with the computer

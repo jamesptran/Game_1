@@ -218,6 +218,8 @@ def sleep(player):
     if sleep_arg == True:
         sleep_increment = 100
         world_time += sleep_increment
+        if player.energy + 20 <= 100:
+            player.energy += 20
     sleep_arg = False
 
 #Interactions with the computer

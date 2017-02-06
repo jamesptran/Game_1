@@ -43,6 +43,9 @@ menu_mouse = (pg.transform.smoothscale(menu_mouse[0], mouse_size), menu_mouse[1]
 #Load menu images
 menu_3 = utils.load_image(os.path.join("menus", "menu_3.png"))
 menu_4 = utils.load_image(os.path.join("menus", "menu_4.png"))
+menu_3 = (pg.transform.smoothscale(menu_3[0], (screen_width/4, screen_height/4)),menu_3[1])
+menu_4 = (pg.transform.smoothscale(menu_4[0], (screen_width/4, screen_height/4)),menu_4[1])
+
 #Load fonts
 smallfont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 15)
 medfont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 20)
@@ -218,8 +221,12 @@ def sleep(player):
     if sleep_arg == True:
         sleep_increment = 100
         world_time += sleep_increment
+<<<<<<< Updated upstream
         if player.energy + 20 <= 100:
             player.energy += 20
+=======
+        player.energy += 50
+>>>>>>> Stashed changes
     sleep_arg = False
 
 #Interactions with the computer
@@ -456,7 +463,7 @@ group.center(player.rect.center)
 #Main game loop
 def main():
     global paused, time_arg, world_time, p_paused, sleep_arg, menu, mouse_clicked_pos, mouse_pos_x_offset
-    dialog_box(dialogs.opening_msg, pcolor.yellow)
+    dialog_box(dialogs.opening_msg, pcolor.dialog_text_color)
     threading.Timer(time_delay, time_update).start()
     while True:
         keys = pg.key.get_pressed()

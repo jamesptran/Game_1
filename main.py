@@ -6,12 +6,14 @@ from pytmx.util_pygame import load_pygame
 import utils, pcolor, dialogs
 
 __author__ = "Lam Nguyen"
+__version__ = "0.0.1"
 
 #Initialize pygame and its variables
-screen_width = 600
+screen_width = 800
 screen_height = 600
 pg.init()
 main_surface = pg.display.set_mode((screen_width, screen_height))
+fadeInSurface = pg.Surface((screen_width,screen_height))
 main_rect = main_surface.get_rect()
 pg.mouse.set_visible(False)
 fps_clock = pg.time.Clock()
@@ -43,8 +45,8 @@ menu_mouse = (pg.transform.smoothscale(menu_mouse[0], mouse_size), menu_mouse[1]
 #Load menu images
 menu_3 = utils.load_image(os.path.join("menus", "menu_3.png"))
 menu_4 = utils.load_image(os.path.join("menus", "menu_4.png"))
-menu_3 = (pg.transform.smoothscale(menu_3[0], (screen_width/4, screen_height/4)),menu_3[1])
-menu_4 = (pg.transform.smoothscale(menu_4[0], (screen_width/4, screen_height/4)),menu_4[1])
+menu_3 = (pg.transform.smoothscale(menu_3[0], (screen_width/2, screen_height/3)),(0,0,screen_width/2, screen_height/3))
+menu_4 = (pg.transform.smoothscale(menu_4[0], (screen_width/2, screen_height/3)),(0,0,screen_width/2, screen_height/3))
 
 #Load fonts
 smallfont = pg.font.Font(os.path.join("data","fonts","prstartk.ttf"), 15)
@@ -97,6 +99,25 @@ def add_text(msg, text_color, size="small", x_offset=0,y_offset=0,x_cor=0,y_cor=
         textRect.top = y_cor
     main_surface.blit(textSurf, textRect)
     return textRect
+
+#Fade in/out black screen
+def fading_screen():
+    fading_fps = 60
+    fadeInSurface.fill((0, 0, 0))
+    #Fading out
+    for i in range (255,0,-5):
+        screen_clean_up()
+        fadeInSurface.set_alpha(255-i)
+        main_surface.blit(fadeInSurface,(0,0))
+        pg.display.update()
+        fps_clock.tick(fading_fps)
+    #Fading in
+    for i in range (0,255,5):
+        screen_clean_up()
+        fadeInSurface.set_alpha(255-i)
+        main_surface.blit(fadeInSurface,(0,0))
+        pg.display.update()
+        fps_clock.tick(fading_fps)
 
 #Create a dialog box in the screen
 def dialog_box(msg, text_color, size="med", scroll="no"):
@@ -181,8 +202,8 @@ def time_increment(time_amount):
 #Blit a menu box with options on the screen
 def menu_box(messages, obj_name, color, option_num = 4):
     global time_arg, mouse_clicked_pos
-    x_offset = 30
-    y_offset = 40
+    x_offset = 25
+    y_offset = 30
     time_arg = False
     mouse_pos = pg.mouse.get_pos()
     result = None
@@ -193,15 +214,27 @@ def menu_box(messages, obj_name, color, option_num = 4):
     if option_num == 3:
         menu_rect = main_surface.blit(menu_3[0], position)
     for index, msg in enumerate(messages):
-        rect = add_text(msg,color, "small",0,0,position[0]+x_offset,
-                        position[1] + (menu_4[1][3] - y_offset) / 4 * index+y_offset,"yes")
-        rect.x -= x_offset/2
-        rect.y -= y_offset/2
-        rect.width += x_offset
-        rect.height += y_offset
+        if option_num == 4:
+            rect = add_text(msg,color, "small",0,0,position[0]+x_offset,
+                            position[1] + menu_4[1][3] / 4 * index + y_offset,"yes")
+            rect.x -= x_offset/2
+            rect.y -= y_offset/2
+            rect.width += x_offset
+            rect.height += y_offset
+        elif option_num == 3:
+            rect = add_text(msg, color, "small", 0, 0, position[0] + x_offset,
+                            position[1] + menu_3[1][3] / 3 * index + y_offset, "yes")
+            rect.x -= x_offset / 2
+            rect.y -= y_offset / 2
+            rect.width += x_offset
+            rect.height += y_offset
         if rect.collidepoint(mouse_pos):
-            add_text(msg, pcolor.blue, "small", 0, 0, position[0] + x_offset,
-                        position[1] + (menu_4[1][3] - y_offset) / 4 * index + y_offset, "yes")
+            if option_num == 4:
+                add_text(msg, pcolor.blue, "small", 0, 0, position[0] + x_offset,
+                        position[1] + menu_4[1][3] / 4 * index + y_offset, "yes")
+            elif option_num == 3:
+                add_text(msg, pcolor.blue, "small", 0, 0, position[0] + x_offset,
+                        position[1] + menu_3[1][3] / 3 * index + y_offset, "yes")
         if mouse_clicked_pos != None and rect.collidepoint(mouse_clicked_pos):
             result = msg
     return result
@@ -219,6 +252,7 @@ def mouse_click_process(obj_name, player):
 def sleep(player):
     global world_time, sleep_arg
     if sleep_arg == True:
+        fading_screen()
         sleep_increment = 100
         world_time += sleep_increment
         if player.energy + 20 <= 100:
